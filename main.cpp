@@ -97,10 +97,10 @@ int main()
     newSize = 0;
   }
 
-  // From vector.
+  // Remove from end of vector.
   testVector.resize(newSize);
 
-  // From map.
+  // Remove from end of map.
   auto rim = testMap.rbegin();
   while(rim != testMap.rend()) {
     if(newSize < testMap.size()) {
@@ -146,8 +146,7 @@ int main()
   }
   testVector.resize(tmp.size());
   testVector.clear();
-  auto it = std::next(tmp.begin(), tmp.size());
-  std::move(tmp.begin(), it, std::back_inserter(testVector));
+  std::move(tmp.begin(), tmp.end(), std::back_inserter(testVector));
   tmp.clear();
 
   // Print state.
