@@ -48,6 +48,7 @@ int main()
 
   // Printers.
   auto printVectorFunc = [](const std::vector<valueType>& v) -> void {
+    std::cout << "\ntestVector.size(): " << v.size() << "\n";
     std::cout << "testVector: ";
     for(auto iv : v) {
       std::cout << iv << " ";
@@ -60,6 +61,7 @@ int main()
         const std::pair<keyType, valueType>& element) -> void {
       std::cout << "[" << element.first << "]==" << element.second << " ";
     };
+    std::cout << "\ntestMap.size(): " << m.size() << "\n";
     std::cout << "testMap: ";
     std::for_each(m.begin(), m.end(), printMapFunc);
     std::cout << "\n";
@@ -83,7 +85,8 @@ int main()
   std::generate_n(
       std::inserter(testMap, testMap.begin()), size, randomPairFunc);
 
-  std::cout << "Initial state, size:" << size << "\n";
+  // Print state.
+  std::cout << "Initial state.\n";
   printVectorFunc(testVector);
   printMapFunc(testMap);
 
@@ -94,7 +97,7 @@ int main()
     newSize = 0;
   }
 
-  // From vector
+  // From vector.
   testVector.resize(newSize);
 
   // From map.
@@ -108,7 +111,8 @@ int main()
     }
   }
 
-  std::cout << "\nNew size:" << newSize << "\n";
+  // Print state.
+  std::cout << "\nAfter removing.\n";
   printVectorFunc(testVector);
   printMapFunc(testMap);
 
@@ -146,9 +150,8 @@ int main()
   std::move(tmp.begin(), it, std::back_inserter(testVector));
   tmp.clear();
 
-  std::cout << "\nAfter sync:\n";
-  std::cout << "testVector.size(): " << testVector.size() << "\n";
-  std::cout << "testMap.size(): " << testMap.size() << "\n";
+  // Print state.
+  std::cout << "\nAfter sync.\n";
   printVectorFunc(testVector);
   printMapFunc(testMap);
 
