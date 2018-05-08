@@ -121,9 +121,9 @@ int main()
   // Map by vector.
   auto im = testMap.begin();
   while(im != testMap.end()) {
-    if(std::find_if(testVector.begin(), testVector.end(),
-           std::bind(std::equal_to<valueType>(), ph::_1, im->second))
-        != testVector.end()) {
+    if(testVector.end()
+        != std::find_if(testVector.begin(), testVector.end(),
+               std::bind(std::equal_to<valueType>(), ph::_1, im->second))) {
       ++im;
     } else {
       im = testMap.erase(im);
@@ -138,9 +138,8 @@ int main()
   tmp.reserve(testVector.size());
 
   for(auto iv = testVector.begin(); iv != testVector.end(); ++iv) {
-    if(std::find_if(
-           testMap.begin(), testMap.end(), std::bind(mapEqFunc, ph::_1, *iv))
-        != testMap.end()) {
+    if(testMap.end() != std::find_if(testMap.begin(), testMap.end(),
+                            std::bind(mapEqFunc, ph::_1, *iv))) {
       tmp.emplace_back(*iv);
     }
   }
