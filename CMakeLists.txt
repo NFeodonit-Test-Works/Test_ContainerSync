@@ -24,7 +24,7 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 project(Test_ContainerSync CXX)
-set(tcs_EXE_NAME "Test_ContainerSync")
+set(tcs_EXE_NAME "${PROJECT_NAME}")
 
 set(tcs_SOURCES
   main.cpp
