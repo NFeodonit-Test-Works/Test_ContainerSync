@@ -52,25 +52,53 @@ int main()
 {
   constexpr int min = 1;
   constexpr int max = 9;
-  constexpr int size = 50;
+  constexpr int size = 20;
+  constexpr int deleteMax = 15;
 
   std::vector<int> testVector(size);
   std::map<int, int> testMap;
 
+  // Random generator functions.
   // https://stackoverflow.com/a/19728404
   std::random_device rd;
   std::mt19937 rng(rd());
-  std::uniform_int_distribution<int> uni(min, max);
-  auto randomIntFunc = [&rng, &uni]() -> int { return uni(rng); };
-  auto randomPairFunc = [&rng, &uni, &testMap]() -> std::pair<int, int> {
-    return std::make_pair(testMap.size(), uni(rng));
+  std::uniform_int_distribution<int> initRnd(min, max);
+  std::uniform_int_distribution<int> deleteRnd(0, deleteMax);
+  auto randomIntFunc = [&rng, &initRnd]() -> int { return initRnd(rng); };
+  auto randomPairFunc = [&rng, &initRnd, &testMap]() -> std::pair<int, int> {
+    return std::make_pair(testMap.size(), initRnd(rng));
   };
 
+  // Fill the containers with a random values.
   std::generate(testVector.begin(), testVector.end(), randomIntFunc);
   std::generate_n(
       std::inserter(testMap, testMap.begin()), size, randomPairFunc);
 
-  std::cout << "Initial state:\n";
+  std::cout << "Initial state, size:" << size << "\n";
+  printVector(testVector);
+  printMap(testMap);
+
+  // Remove a random count of elements from the containers.
+  int newSize = testVector.size() - deleteRnd(rng);
+  if(newSize < 0) {
+    newSize = 0;
+  }
+
+  // From vector
+  testVector.resize(newSize);
+
+  // From map.
+  auto im = testMap.rbegin();
+  while(im != testMap.rend()) {
+    if(newSize < testMap.size()) {
+      std::advance(im, 1);
+      testMap.erase(im.base());
+    } else {
+      break;
+    }
+  }
+
+  std::cout << "\nNew size:" << newSize << "\n";
   printVector(testVector);
   printMap(testMap);
 
