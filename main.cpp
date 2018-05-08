@@ -29,6 +29,25 @@
 #include <utility>
 #include <vector>
 
+void printVector(const std::vector<int>& v)
+{
+  std::cout << "testVector: ";
+  for(auto iv : v) {
+    std::cout << iv << " ";
+  }
+  std::cout << "\n";
+}
+
+void printMap(const std::map<int, int>& m)
+{
+  auto printMap = [](const std::pair<int, int>& element) {
+    std::cout << "[" << element.first << "]==" << element.second << " ";
+  };
+  std::cout << "testMap: ";
+  std::for_each(m.begin(), m.end(), printMap);
+  std::cout << "\n";
+}
+
 int main()
 {
   constexpr int min = 1;
@@ -52,19 +71,8 @@ int main()
       std::inserter(testMap, testMap.begin()), size, randomPairFunc);
 
   std::cout << "Initial state:\n";
-
-  std::cout << "testVector: ";
-  for(auto iv : testVector) {
-    std::cout << iv << " ";
-  }
-  std::cout << "\n";
-
-  auto printMap = [](const std::pair<int, int>& element) {
-    std::cout << "[" << element.first << "]==" << element.second << " ";
-  };
-  std::cout << "testMap: ";
-  std::for_each(testMap.begin(), testMap.end(), printMap);
-  std::cout << "\n";
+  printVector(testVector);
+  printMap(testMap);
 
   return 0;
 }
