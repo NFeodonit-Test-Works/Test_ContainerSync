@@ -22,6 +22,7 @@
  ****************************************************************************/
 
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <map>
@@ -29,56 +30,65 @@
 #include <utility>
 #include <vector>
 
-void printVector(const std::vector<int>& v)
-{
-  std::cout << "testVector: ";
-  for(auto iv : v) {
-    std::cout << iv << " ";
-  }
-  std::cout << "\n";
-}
-
-void printMap(const std::map<int, int>& m)
-{
-  auto printMap = [](const std::pair<int, int>& element) {
-    std::cout << "[" << element.first << "]==" << element.second << " ";
-  };
-  std::cout << "testMap: ";
-  std::for_each(m.begin(), m.end(), printMap);
-  std::cout << "\n";
-}
-
 int main()
 {
-  constexpr int min = 1;
-  constexpr int max = 9;
+  namespace ph = std::placeholders;
+
+  using keyType = int;
+  using valueType = int;
+
+  constexpr valueType min = 1;
+  constexpr valueType max = 9;
   constexpr int size = 20;
   constexpr int deleteMax = 15;
 
-  std::vector<int> testVector(size);
-  std::map<int, int> testMap;
+  // Our containers.
+  std::map<keyType, valueType> testMap;
+  std::vector<valueType> testVector(size);
+
+  // Printers.
+  auto printVectorFunc = [](const std::vector<valueType>& v) -> void {
+    std::cout << "testVector: ";
+    for(auto iv : v) {
+      std::cout << iv << " ";
+    }
+    std::cout << "\n";
+  };
+
+  auto printMapFunc = [](const std::map<keyType, valueType>& m) -> void {
+    auto printMapFunc = [](
+        const std::pair<keyType, valueType>& element) -> void {
+      std::cout << "[" << element.first << "]==" << element.second << " ";
+    };
+    std::cout << "testMap: ";
+    std::for_each(m.begin(), m.end(), printMapFunc);
+    std::cout << "\n";
+  };
 
   // Random generator functions.
   // https://stackoverflow.com/a/19728404
   std::random_device rd;
   std::mt19937 rng(rd());
-  std::uniform_int_distribution<int> initRnd(min, max);
-  std::uniform_int_distribution<int> deleteRnd(0, deleteMax);
-  auto randomIntFunc = [&rng, &initRnd]() -> int { return initRnd(rng); };
-  auto randomPairFunc = [&rng, &initRnd, &testMap]() -> std::pair<int, int> {
+  std::uniform_int_distribution<valueType> initRnd(min, max);
+  std::uniform_int_distribution<valueType> deleteRnd(0, deleteMax);
+  auto randomIntFunc = [&rng, &initRnd]() -> valueType { return initRnd(rng); };
+  auto randomPairFunc = [&rng, &initRnd,
+      &testMap]() -> std::pair<keyType, valueType> {
     return std::make_pair(testMap.size(), initRnd(rng));
   };
 
   // Fill the containers with a random values.
+
   std::generate(testVector.begin(), testVector.end(), randomIntFunc);
   std::generate_n(
       std::inserter(testMap, testMap.begin()), size, randomPairFunc);
 
   std::cout << "Initial state, size:" << size << "\n";
-  printVector(testVector);
-  printMap(testMap);
+  printVectorFunc(testVector);
+  printMapFunc(testMap);
 
   // Remove a random count of elements from the containers.
+
   int newSize = testVector.size() - deleteRnd(rng);
   if(newSize < 0) {
     newSize = 0;
@@ -88,19 +98,59 @@ int main()
   testVector.resize(newSize);
 
   // From map.
-  auto im = testMap.rbegin();
-  while(im != testMap.rend()) {
+  auto rim = testMap.rbegin();
+  while(rim != testMap.rend()) {
     if(newSize < testMap.size()) {
-      std::advance(im, 1);
-      testMap.erase(im.base());
+      std::advance(rim, 1);
+      testMap.erase(rim.base());
     } else {
       break;
     }
   }
 
   std::cout << "\nNew size:" << newSize << "\n";
-  printVector(testVector);
-  printMap(testMap);
+  printVectorFunc(testVector);
+  printMapFunc(testMap);
+
+  // Sync the containers.
+
+  // Map by vector.
+  auto im = testMap.begin();
+  while(im != testMap.end()) {
+    if(std::find_if(testVector.begin(), testVector.end(),
+           std::bind(std::equal_to<valueType>(), ph::_1, im->second))
+        != testVector.end()) {
+      ++im;
+    } else {
+      im = testMap.erase(im);
+    }
+  }
+
+  // Vector by map.
+  auto mapEqFunc = [](const std::pair<keyType, valueType>& element,
+      const valueType& value) -> bool { return element.second == value; };
+
+  std::vector<valueType> tmp;
+  tmp.reserve(testVector.size());
+
+  for(auto iv = testVector.begin(); iv != testVector.end(); ++iv) {
+    if(std::find_if(
+           testMap.begin(), testMap.end(), std::bind(mapEqFunc, ph::_1, *iv))
+        != testMap.end()) {
+      tmp.emplace_back(*iv);
+    }
+  }
+  testVector.resize(tmp.size());
+  testVector.clear();
+  auto it = std::next(tmp.begin(), tmp.size());
+  std::move(tmp.begin(), it, std::back_inserter(testVector));
+  tmp.clear();
+
+  std::cout << "\nAfter sync:\n";
+  std::cout << "testVector.size(): " << testVector.size() << "\n";
+  std::cout << "testMap.size(): " << testMap.size() << "\n";
+  printVectorFunc(testVector);
+  printMapFunc(testMap);
 
   return 0;
 }
