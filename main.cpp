@@ -57,13 +57,13 @@ int main()
   };
 
   auto printMapFunc = [](const std::map<keyType, valueType>& m) -> void {
-    auto printMapFunc = [](
+    auto printFunc = [](
         const std::pair<keyType, valueType>& element) -> void {
       std::cout << "[" << element.first << "]==" << element.second << " ";
     };
     std::cout << "\ntestMap.size(): " << m.size() << "\n";
     std::cout << "testMap: ";
-    std::for_each(m.begin(), m.end(), printMapFunc);
+    std::for_each(m.begin(), m.end(), printFunc);
     std::cout << "\n";
   };
 
@@ -92,23 +92,22 @@ int main()
 
   // Remove a random count of elements from the containers.
 
-  int newSize = testVector.size() - deleteRnd(rng);
-  if(newSize < 0) {
-    newSize = 0;
+  int newSizeVector = testVector.size() - deleteRnd(rng);
+  if(newSizeVector < 0) {
+    newSizeVector = 0;
+  }
+  int newSizeMap = testMap.size() - deleteRnd(rng);
+  if(newSizeMap < 0) {
+    newSizeMap = 0;
   }
 
   // Remove from end of vector.
-  testVector.resize(newSize);
+  testVector.resize(newSizeVector);
 
-  // Remove from end of map.
-  auto rim = testMap.rbegin();
-  while(rim != testMap.rend()) {
-    if(newSize < testMap.size()) {
-      std::advance(rim, 1);
-      testMap.erase(rim.base());
-    } else {
-      break;
-    }
+  // Remove from start of map.
+  auto im = testMap.begin();
+  while(im != testMap.end() && newSizeMap < testMap.size()) {
+    im = testMap.erase(im);
   }
 
   // Print state.
@@ -116,10 +115,26 @@ int main()
   printVectorFunc(testVector);
   printMapFunc(testMap);
 
+  // Check containers size before sync.
+
+  if(testVector.size() == 0 && testMap.size() > 0) {
+    testMap.clear();
+  }
+  if(testMap.size() == 0 && testVector.size() > 0) {
+    testVector.clear();
+  }
+  if(testMap.size() == 0 && testVector.size() == 0) {
+    // Print state.
+    std::cout << "\nAfter size checking.\n";
+    printVectorFunc(testVector);
+    printMapFunc(testMap);
+    return 0;
+  }
+
   // Sync the containers.
 
   // Map by vector.
-  auto im = testMap.begin();
+  im = testMap.begin();
   while(im != testMap.end()) {
     if(testVector.end()
         != std::find_if(testVector.begin(), testVector.end(),
