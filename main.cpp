@@ -3,7 +3,7 @@
  * Purpose:  Test project
  * Author:   NikitaFeodonit, nfeodonit@yandex.com
  *****************************************************************************
- *   Copyright (c) 2017-2018 NikitaFeodonit
+ *   Copyright (c) 2018 NikitaFeodonit
  *
  *    This file is part of the Test_ContainerSync project.
  *
